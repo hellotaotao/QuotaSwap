@@ -135,6 +135,11 @@ enum Entry {
         if let first = args.first, CLI.commands.contains(first) {
             exit(CLI.run(args))
         }
+        #if DEBUG
+        if args.first == "render-preview", args.count == 2 {
+            exit(MainActor.assumeIsolated { PreviewRenderer.render(to: args[1]) })
+        }
+        #endif
         QuotaSwapApp.main()
     }
 }

@@ -20,7 +20,7 @@ struct MenuLabel: View {
         if model.blocked {
             Image(systemName: "exclamationmark.triangle")
         } else if let usage = model.currentRow?.usage {
-            Text("\(percent(usage.fiveHour?.utilization)) · \(percent(usage.sevenDay?.utilization))")
+            Text("5h \(percent(usage.fiveHour?.utilization)) · Wk \(percent(usage.sevenDay?.utilization))")
                 .monospacedDigit()
         } else {
             Image(systemName: "person.2.circle")
@@ -138,8 +138,8 @@ struct AccountRow: View {
             if model.pending == .switchTo(row.id) {
                 ConfirmRow(text: "Claude will restart.", confirm: "Switch") { model.perform(.switchTo(row.id)) } cancel: { model.pending = nil }
             }
-            UsageBar(title: "5h", window: row.usage?.fiveHour, loaded: row.usage != nil)
-            UsageBar(title: "Week", window: row.usage?.sevenDay, loaded: row.usage != nil)
+            UsageBar(title: "5h", window: row.usage?.fiveHour, length: 5 * 3600, loaded: row.usage != nil)
+            UsageBar(title: "Week", window: row.usage?.sevenDay, length: 7 * 86400, loaded: row.usage != nil)
             if let error = row.error {
                 Text(error).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
             }
@@ -152,14 +152,17 @@ struct AccountRow: View {
 struct UsageBar: View {
     let title: String
     let window: UsageWindow?
+    let length: TimeInterval
     let loaded: Bool
 
     var body: some View {
         HStack(spacing: 8) {
             Text(title).font(.caption).foregroundStyle(.secondary).frame(width: 34, alignment: .leading)
             if let value = window?.utilization {
-                ProgressView(value: min(max(value, 0), 100), total: 100)
-                    .tint(value >= 90 ? .red : value >= 75 ? .orange : .accentColor)
+                let elapsed = elapsedFraction(resetsAt: window?.resetsAt, length: length)
+                PaceBar(used: min(max(value, 0), 100) / 100, elapsed: elapsed,
+                        color: Pace(usedPercent: value, elapsed: elapsed).color)
+                    .help(elapsed.map { "\(percent(value)) used, \(percent($0 * 100)) of the window elapsed" } ?? "\(percent(value)) used")
                 Text(percent(value)).font(.caption).monospacedDigit().frame(width: 34, alignment: .trailing)
                 Text(shortDuration(until: window?.resetsAt).map { "↻ \($0)" } ?? "")
                     .font(.caption2).foregroundStyle(.secondary).monospacedDigit()
@@ -170,6 +173,59 @@ struct UsageBar: View {
             }
         }
     }
+}
+
+/// Usage bar with a tick marking how much of the window has elapsed.
+struct PaceBar: View {
+    let used: Double  // 0...1
+    let elapsed: Double?  // 0...1
+    let color: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.1))
+                Capsule().fill(color).frame(width: used > 0 ? max(6, geo.size.width * used) : 0)
+                if let elapsed {
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Color.primary.opacity(0.7))
+                        .frame(width: 2, height: 11)
+                        .offset(x: min(max(geo.size.width * elapsed - 1, 0), geo.size.width - 2))
+                }
+            }
+        }
+        .frame(height: 6)
+    }
+}
+
+/// Compares usage with elapsed time: ahead of the clock is red, behind is
+/// green, within 5 points either way is yellow.
+enum Pace {
+    case under, even, over
+
+    init(usedPercent: Double, elapsed: Double?) {
+        if usedPercent >= 100 {
+            self = .over
+        } else if let elapsed {
+            let lead = usedPercent - elapsed * 100
+            self = lead > 5 ? .over : lead < -5 ? .under : .even
+        } else {
+            self = .under  // window not started yet
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .under: return .green
+        case .even: return Color(red: 0.95, green: 0.72, blue: 0.1)
+        case .over: return .red
+        }
+    }
+}
+
+func elapsedFraction(resetsAt: Date?, length: TimeInterval, now: Date = Date()) -> Double? {
+    guard let resetsAt else { return nil }
+    return min(max(1 - resetsAt.timeIntervalSince(now) / length, 0), 1)
 }
 
 struct ConfirmRow: View {
@@ -203,3 +259,39 @@ struct Notice<Content: View>: View {
 func percent(_ value: Double?) -> String {
     value.map { "\(Int($0.rounded()))%" } ?? "—"
 }
+
+#if DEBUG
+/// `QuotaSwap render-preview out.png` (debug builds only): renders the usage
+/// bars with fixed sample data so layout changes can be checked without a menu bar.
+@MainActor
+enum PreviewRenderer {
+    static func render(to path: String) -> Int32 {
+        let now = Date()
+        func window(_ used: Double, resetIn: TimeInterval) -> UsageWindow {
+            UsageWindow(utilization: used, resetsAt: now.addingTimeInterval(resetIn))
+        }
+        let samples: [(String, UsageWindow?, TimeInterval)] = [
+            ("5h", window(23, resetIn: 4 * 3600 + 40 * 60), 5 * 3600),
+            ("Week", window(24, resetIn: 2 * 86400 + 3 * 3600), 7 * 86400),
+            ("5h", window(0, resetIn: 3 * 3600 + 40 * 60), 5 * 3600),
+            ("Week", window(88, resetIn: 86400 + 12 * 3600), 7 * 86400),
+            ("5h", window(50, resetIn: 2.5 * 3600), 5 * 3600),
+            ("Week", nil, 7 * 86400),
+        ]
+        let view = VStack(alignment: .leading, spacing: 8) {
+            Text("5h 23% · Wk 24%").monospacedDigit()
+            ForEach(Array(samples.enumerated()), id: \.offset) { _, s in
+                UsageBar(title: s.0, window: s.1, length: s.2, loaded: true)
+            }
+        }
+        .padding(14)
+        .frame(width: 340)
+        .background(Color.white)
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 2
+        guard let image = renderer.nsImage, let tiff = image.tiffRepresentation,
+              let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return 1 }
+        return (try? png.write(to: URL(fileURLWithPath: path))) == nil ? 1 : 0
+    }
+}
+#endif
