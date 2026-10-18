@@ -82,21 +82,17 @@ struct MenuContent: View {
     }
 
     private func unsavedNotice(_ account: String) -> some View {
-        Notice(color: .accentColor) {
-            Text("Signed in as \(account), not saved yet.").font(.callout)
-            if model.pending == .save {
-                ConfirmRow(text: "Claude will restart.", confirm: "Save") { model.perform(.save) } cancel: { model.pending = nil }
-            } else {
-                Button("Save this account") { model.pending = .save }
-                    .disabled(model.blocked || model.busy != nil)
-            }
-        }
+        UnsavedNotice(account: account, confirming: model.pending == .save,
+                      disabled: model.blocked || model.busy != nil,
+                      ask: { model.pending = .save }, confirm: { model.perform(.save) }, cancel: { model.pending = nil })
     }
 
     private var footer: some View {
         HStack {
             if model.pending == .add {
-                ConfirmRow(text: "Claude will restart signed out.", confirm: "Continue") { model.perform(.add) } cancel: { model.pending = nil }
+                ConfirmRow(text: "Claude restarts at the sign-in screen."
+                           + (model.currentRow?.profile.email.map { " \($0) stays saved." } ?? ""),
+                           confirm: "Continue") { model.perform(.add) } cancel: { model.pending = nil }
             } else {
                 Button("Add account…") { model.pending = .add }
                     .disabled(model.blocked || model.busy != nil || model.unsavedAccount != nil)
@@ -131,12 +127,15 @@ struct AccountRow: View {
                 Spacer()
                 if row.loading { ProgressView().controlSize(.small) }
                 if !isCurrent && model.pending != .switchTo(row.id) {
-                    Button("Switch") { model.pending = .switchTo(row.id) }
+                    Button("Use account") { model.pending = .switchTo(row.id) }
                         .disabled(model.blocked || model.busy != nil || model.unsavedAccount != nil)
+                        .help("Switch Claude to \(row.profile.email ?? row.profile.name)")
                 }
             }
             if model.pending == .switchTo(row.id) {
-                ConfirmRow(text: "Claude will restart.", confirm: "Switch") { model.perform(.switchTo(row.id)) } cancel: { model.pending = nil }
+                ConfirmRow(text: "Claude restarts signed in as \(row.profile.email ?? row.profile.name).", confirm: "Switch") {
+                    model.perform(.switchTo(row.id))
+                } cancel: { model.pending = nil }
             }
             UsageBar(title: "5h", window: row.usage?.fiveHour, length: 5 * 3600, loaded: row.usage != nil)
             UsageBar(title: "Week", window: row.usage?.sevenDay, length: 7 * 86400, loaded: row.usage != nil)
@@ -235,11 +234,41 @@ struct ConfirmRow: View {
     let cancel: () -> Void
 
     var body: some View {
-        HStack {
-            Text(text).font(.caption).foregroundStyle(.secondary)
-            Spacer()
-            Button("Cancel", action: cancel).buttonStyle(.borderless)
-            Button(confirm, action: action).buttonStyle(.borderedProminent).controlSize(.small)
+        VStack(alignment: .leading, spacing: 6) {
+            Text(text).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button("Cancel", action: cancel).buttonStyle(.borderless)
+                Button(confirm, action: action).buttonStyle(.borderedProminent).controlSize(.small)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// Shown when Claude is signed in to an account QuotaSwap has no snapshot of,
+/// typically right after "Add account".
+struct UnsavedNotice: View {
+    let account: String
+    let confirming: Bool
+    let disabled: Bool
+    let ask: () -> Void
+    let confirm: () -> Void
+    let cancel: () -> Void
+
+    var body: some View {
+        Notice(color: .accentColor) {
+            Text("New account signed in").font(.callout.weight(.semibold))
+            Text("Save \(account) to switch to it later and see its usage.")
+                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            if confirming {
+                ConfirmRow(text: "Claude restarts once to capture the login.", confirm: "Save", action: confirm, cancel: cancel)
+            } else {
+                Button("Save this account", action: ask)
+                    .buttonStyle(.borderedProminent).controlSize(.small)
+                    .disabled(disabled)
+                    .padding(.top, 2)
+            }
         }
     }
 }
@@ -283,6 +312,16 @@ enum PreviewRenderer {
             ForEach(Array(samples.enumerated()), id: \.offset) { _, s in
                 UsageBar(title: s.0, window: s.1, length: s.2, loaded: true)
             }
+            HStack {
+                Text("bob@example.com").fontWeight(.medium)
+                Spacer()
+                Button("Use account") {}
+            }
+            ConfirmRow(text: "Claude restarts signed in as bob@example.com.", confirm: "Switch", action: {}, cancel: {})
+            ConfirmRow(text: "Claude restarts at the sign-in screen. alice@example.com stays saved.",
+                       confirm: "Continue", action: {}, cancel: {})
+            UnsavedNotice(account: "new@example.com", confirming: false, disabled: false, ask: {}, confirm: {}, cancel: {})
+            UnsavedNotice(account: "new@example.com", confirming: true, disabled: false, ask: {}, confirm: {}, cancel: {})
         }
         .padding(14)
         .frame(width: 340)

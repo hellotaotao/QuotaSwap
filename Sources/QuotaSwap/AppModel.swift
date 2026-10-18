@@ -130,7 +130,7 @@ final class AppModel: ObservableObject {
 
     nonisolated private static func summary(for action: Action, log: [String]) -> String {
         switch action {
-        case .add: return "Sign in to the other account in Claude, then save it here."
+        case .add: return "Sign in to the new account in Claude, then come back here to save it."
         default: return log.last { $0.hasPrefix("switched") || $0.hasPrefix("saved") || $0.contains("already signed in") } ?? "Done."
         }
     }
