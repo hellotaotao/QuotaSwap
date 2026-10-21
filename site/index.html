@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuotaSwap: switch Claude accounts from the menu bar</title>
+  <meta name="description" content="A free, open-source macOS menu bar app that switches the Claude desktop app between your accounts in one click, keeps your Code sessions, and shows every account's 5-hour and weekly usage.">
+  <meta property="og:title" content="QuotaSwap: switch Claude accounts from the menu bar">
+  <meta property="og:description" content="One-click account switching for the Claude desktop app, with each account's usage and pace in your menu bar.">
+  <meta property="og:url" content="https://quotaswap.taotao.au/">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/demo.js" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="menubar" role="presentation">
+      <div class="menubar-left">
+        <span class="menubar-app">Claude</span>
+        <span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+      </div>
+      <div class="menubar-right">
+        <button class="status-item" id="status-item" aria-expanded="true" aria-controls="panel"
+                aria-label="QuotaSwap menu, signed-in account usage">
+          <span id="status-text">5h 42% · Wk 26%</span>
+        </button>
+        <svg class="glyph" viewBox="0 0 20 14" aria-hidden="true"><path d="M10 13.2 6.8 9.6a4.6 4.6 0 0 1 6.4 0L10 13.2Zm-5.6-6a8 8 0 0 1 11.2 0l1.7-1.9a10.6 10.6 0 0 0-14.6 0l1.7 1.9Z" fill="currentColor"/></svg>
+        <svg class="glyph" viewBox="0 0 26 13" aria-hidden="true"><rect x="0.75" y="0.75" width="21.5" height="11.5" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><rect x="2.6" y="2.6" width="15" height="7.8" rx="1.8" fill="currentColor"/><path d="M23.8 4.6v3.8c.9-.3 1.4-1 1.4-1.9s-.5-1.6-1.4-1.9Z" fill="currentColor" opacity=".55"/></svg>
+        <span class="clock">Wed 9:41</span>
+      </div>
+    </div>
+
+    <div class="hero-body">
+      <div class="hero-copy">
+        <h1>Switch Claude accounts without signing out.</h1>
+        <p class="lede">QuotaSwap keeps a login for each of your Claude accounts and swaps the desktop app between them in one click. Your Code sessions come along, and every account's usage sits in the menu bar.</p>
+        <div class="install">
+          <div class="command">
+            <code id="brew-command">brew install --cask hellotaotao/tap/quotaswap</code>
+            <button class="copy" type="button" data-copy="brew-command">Copy</button>
+          </div>
+          <a class="download" href="https://github.com/hellotaotao/QuotaSwap/releases/latest/download/QuotaSwap.dmg">Download for Mac</a>
+        </div>
+        <p class="fineprint">Free and open source. macOS 13 or later, Apple silicon and Intel, notarized by Apple.</p>
+      </div>
+
+      <div class="panel-anchor">
+        <div class="panel" id="panel" aria-live="polite">
+          <noscript><p class="panel-noscript">This is an interactive preview of the QuotaSwap menu. Turn on JavaScript to try it.</p></noscript>
+        </div>
+        <p class="panel-hint" id="panel-hint">Try it: switch to the other account.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="features" aria-labelledby="features-title">
+      <h2 id="features-title" class="visually-hidden">What QuotaSwap does</h2>
+      <div class="feature">
+        <h3>Switch in one click</h3>
+        <p>QuotaSwap saves each account's login on your Mac. Switching quits Claude, swaps the login and reopens it already signed in. No browser, no password, no waiting for an email code.</p>
+      </div>
+      <div class="feature">
+        <h3>Keep your Code sessions</h3>
+        <p>The Claude desktop app gives each account its own list of Code sessions. QuotaSwap merges the lists every time you switch, so a session you started on one account is right there on the other, with its whole history.</p>
+      </div>
+      <div class="feature">
+        <h3>See every account's usage</h3>
+        <p>Each account shows how much of its 5-hour and weekly limit is used and when each resets, refreshed every five minutes. The menu bar shows the account you're signed in to, so you know when it's time to switch.</p>
+      </div>
+    </section>
+
+    <section class="pace" aria-labelledby="pace-title">
+      <div class="pace-copy">
+        <h2 id="pace-title">Know if you'll make it to the reset</h2>
+        <p>A percentage alone doesn't tell you much. 60% used is fine near the end of the week and a problem on day two. Each bar carries a tick that marks how much of the window has already passed, and its color compares the two.</p>
+      </div>
+      <figure class="pace-figure">
+        <div class="pace-scale" aria-hidden="true">
+          <div class="pace-bar"><span class="pace-fill" style="width: 88%"></span><span class="pace-tick" style="left: 79%"></span></div>
+          <div class="pace-callouts">
+            <span class="callout callout-tick" style="left: 79%">79% of the week has passed</span>
+            <span class="callout callout-fill" style="left: 88%">88% used</span>
+          </div>
+        </div>
+        <figcaption class="visually-hidden">A weekly bar 88% full with a tick at 79%: usage is 9 points ahead of time, so the bar is red.</figcaption>
+        <ul class="pace-legend">
+          <li><span class="swatch swatch-red"></span><span><strong>Red</strong> means you're using it faster than time passes, more than 5 points ahead of the tick.</span></li>
+          <li><span class="swatch swatch-amber"></span><span><strong>Yellow</strong> means you're on pace, within 5 points of the tick.</span></li>
+          <li><span class="swatch swatch-green"></span><span><strong>Green</strong> means you're behind the tick, with room to spare.</span></li>
+        </ul>
+      </figure>
+    </section>
+
+    <section class="start" aria-labelledby="start-title">
+      <h2 id="start-title">Getting started</h2>
+      <ol class="steps">
+        <li>
+          <h3>Save the account you're signed in to</h3>
+          <p>Open QuotaSwap from the menu bar and click <em>Save this account</em>.</p>
+        </li>
+        <li>
+          <h3>Add your other account</h3>
+          <p>Click <em>Add account</em>. Claude restarts at its sign-in screen, and the account you just saved stays saved.</p>
+        </li>
+        <li>
+          <h3>Sign in and save it</h3>
+          <p>Sign in to the other account in Claude as usual, then click <em>Save this account</em> again. This is the last time you sign in.</p>
+        </li>
+        <li>
+          <h3>Switch whenever you like</h3>
+          <p>Click <em>Use account</em> next to any account. Claude restarts signed in to it, with all your Code sessions.</p>
+        </li>
+      </ol>
+      <p class="note">The first time QuotaSwap reads usage, macOS asks whether it may use the "Claude Safe Storage" keychain item. QuotaSwap needs it to read Claude's session cookie on your Mac. Choose <em>Always Allow</em> and you won't be asked again.</p>
+    </section>
+
+    <section class="trust" aria-labelledby="trust-title">
+      <h2 id="trust-title">What it touches</h2>
+      <p>Everything stays on your Mac. The only network requests QuotaSwap makes are usage requests to claude.ai, sent with each account's saved session. There is no QuotaSwap account, no server and no telemetry.</p>
+      <table>
+        <thead>
+          <tr><th scope="col">What</th><th scope="col">Where</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>A saved login for each account, still encrypted by Claude</td><td><code>~/Library/Application Support/Claude-accounts</code></td></tr>
+          <tr><td>Each account's list of Code sessions, merged on every switch</td><td><code>~/Library/Application Support/Claude/claude-code-sessions</code></td></tr>
+          <tr><td>Session transcripts, shared by all accounts and never modified</td><td><code>~/.claude/projects</code></td></tr>
+        </tbody>
+      </table>
+      <p>Claude doesn't document any of this, so QuotaSwap checks it before every change. If a Claude update moves things around, switching turns off and the menu says which check failed. Nothing is written until an updated QuotaSwap knows the new layout.</p>
+    </section>
+
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <details>
+        <summary>Will switching interrupt what Claude is doing?</summary>
+        <p>Yes. Switching quits and reopens Claude, so chats and Code sessions that are running stop. QuotaSwap asks before every switch.</p>
+      </details>
+      <details>
+        <summary>Can I use Claude's own Log out?</summary>
+        <p>Use <em>Add account</em> in QuotaSwap instead. Logging out in Claude may end that login on Anthropic's side, and you'd have to sign in and save the account again.</p>
+      </details>
+      <details>
+        <summary>Does it switch the Claude Code command-line tool too?</summary>
+        <p>No. QuotaSwap switches the Claude desktop app, including its Code tab. The <code>claude</code> command in your terminal keeps its own login.</p>
+      </details>
+      <details>
+        <summary>Is it useful with only one account?</summary>
+        <p>Yes. The menu bar usage and pace bars work the same for a single account.</p>
+      </details>
+      <details>
+        <summary>How do I update or uninstall it?</summary>
+        <p>With Homebrew, run <code>brew upgrade --cask quotaswap</code>, or <code>brew uninstall --zap --cask quotaswap</code> to remove it with its saved logins. Claude stays signed in to whichever account you used last.</p>
+      </details>
+      <details>
+        <summary>Is this made by Anthropic?</summary>
+        <p>No. QuotaSwap is an independent open-source project and isn't affiliated with or endorsed by Anthropic. Use it within Anthropic's terms for your plans.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>QuotaSwap is free and open source under the MIT license.</p>
+    <p><a href="https://github.com/hellotaotao/QuotaSwap">Source on GitHub</a> <a href="https://github.com/hellotaotao/QuotaSwap/releases">Release notes</a> <a href="https://github.com/hellotaotao/QuotaSwap/issues">Report a problem</a></p>
+  </footer>
+</body>
+</html>

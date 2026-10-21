@@ -46,6 +46,8 @@ notarize "$DMG"
 xcrun stapler staple "$DMG"
 spctl -a -t open --context context:primary-signature -v "$DMG"
 
-gh release create "$TAG" "$DMG" --repo hellotaotao/QuotaSwap --title "QuotaSwap $VERSION" \
+# A copy under a fixed name keeps releases/latest/download/QuotaSwap.dmg valid for the website.
+cp "$DMG" build/QuotaSwap.dmg
+gh release create "$TAG" "$DMG" build/QuotaSwap.dmg --repo hellotaotao/QuotaSwap --title "QuotaSwap $VERSION" \
     --notes "Notarized universal build for macOS 13+. Install with \`brew install --cask hellotaotao/tap/quotaswap\` or open the DMG."
 echo "sha256: $(shasum -a 256 "$DMG" | cut -d' ' -f1)"

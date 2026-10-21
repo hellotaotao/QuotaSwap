@@ -2,6 +2,8 @@
 
 A macOS menu bar app for people who use more than one Claude account in the Claude desktop app.
 
+**Website:** [quotaswap.taotao.au](https://quotaswap.taotao.au), with a clickable preview of the menu.
+
 - **One-click account switching.** No signing out, no browser sign-in. QuotaSwap keeps a local snapshot of each account's login and swaps them.
 - **Your Code sessions follow you.** The desktop app keeps a separate Code session list per account. QuotaSwap merges those lists when you switch, so every account shows every session, with its full history.
 - **Usage for every account, with pace.** Each account shows its 5-hour and weekly usage and when each resets. A tick on the bar marks how much of the window has passed. The bar turns red when you are using faster than the clock, yellow when you are on pace, and green when you are behind it.
