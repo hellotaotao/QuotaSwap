@@ -1,7 +1,7 @@
 import Foundation
 
 enum CLI {
-    static let commands: Set<String> = ["list", "usage", "doctor", "use", "save", "add", "rename", "sync", "help", "--help", "-h"]
+    static let commands: Set<String> = ["list", "usage", "doctor", "use", "save", "add", "rename", "sync", "autostart", "help", "--help", "-h"]
 
     static let help = """
     QuotaSwap: switch the Claude desktop app between accounts and watch their usage.
@@ -15,6 +15,7 @@ enum CLI {
       quotaswap add                  sign Claude out locally to add another account
       quotaswap rename OLD NEW       change a saved account's short name
       quotaswap sync [--dry-run]     merge Code session lists across accounts
+      quotaswap autostart [on|off]   show or change whether QuotaSwap opens at login
     """
 
     static func run(_ args: [String]) -> Int32 {
@@ -30,6 +31,11 @@ enum CLI {
             case ("rename", 3):
                 let renamed = try Accounts.rename(try Profiles.resolve(args[1]), to: args[2])
                 print("renamed '\(args[1])' -> \(renamed.label)")
+            case ("autostart", 1):
+                print(describeLoginItem())
+            case ("autostart", 2) where ["on", "off"].contains(args[1]):
+                try LoginItem.set(args[1] == "on")
+                print(describeLoginItem())
             case ("sync", 1), ("sync", 2):
                 let dryRun = args.count == 2 && args[1] == "--dry-run"
                 if args.count == 2 && !dryRun { print(help); return 2 }
@@ -49,6 +55,14 @@ enum CLI {
         } catch {
             FileHandle.standardError.write(Data((error.localizedDescription + "\n").utf8))
             return 1
+        }
+    }
+
+    private static func describeLoginItem() -> String {
+        switch LoginItem.state {
+        case .on: return "opens at login: on"
+        case .off: return "opens at login: off"
+        case .needsApproval: return "opens at login: waiting for approval. \(LoginItem.approvalHint)"
         }
     }
 

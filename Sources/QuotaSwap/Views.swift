@@ -52,6 +52,9 @@ struct MenuContent: View {
                 Text(message).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Divider()
+            Toggle("Open at login", isOn: Binding(get: { model.loginItem == .on }, set: { model.setOpenAtLogin($0) }))
+                .toggleStyle(.checkbox)
+                .font(.callout)
             footer
         }
         .padding(14)

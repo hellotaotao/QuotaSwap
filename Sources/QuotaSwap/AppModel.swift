@@ -24,6 +24,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var claudeVersion: String?
     @Published private(set) var claudeUpdated = false
     @Published private(set) var busy: String?
+    @Published private(set) var loginItem = LoginItem.state
     @Published var message: String?
     @Published var pending: Action?
 
@@ -61,6 +62,7 @@ final class AppModel: ObservableObject {
         unsavedAccount = signedIn && Profiles.forUUID(currentUUID) == nil
             ? (EmailDetector.email(for: currentUUID) ?? currentUUID ?? "unknown account") : nil
 
+        loginItem = LoginItem.state
         claudeVersion = ClaudeApp.version
         let lastVerified = SelfCheck.lastVerifiedVersion
         failedChecks = SelfCheck.run().filter { !$0.ok }
@@ -98,6 +100,19 @@ final class AppModel: ObservableObject {
     }
 
     // MARK: actions
+
+    func setOpenAtLogin(_ enabled: Bool) {
+        do {
+            try LoginItem.set(enabled)
+        } catch {
+            if LoginItem.state != .needsApproval { message = error.localizedDescription }
+        }
+        loginItem = LoginItem.state
+        if enabled && loginItem == .needsApproval {
+            message = LoginItem.approvalHint
+            LoginItem.openSystemSettings()
+        }
+    }
 
     func perform(_ action: Action) {
         pending = nil

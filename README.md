@@ -29,6 +29,8 @@ Or download the DMG from [Releases](https://github.com/hellotaotao/QuotaSwap/rel
 3. Sign in to your other account in Claude, then click **Save this account** in QuotaSwap again.
 4. From now on, click **Use account** next to any account to switch.
 
+To have QuotaSwap start when you log in, tick **Open at login** in its menu.
+
 The first time QuotaSwap reads usage, macOS asks whether it may use the "Claude Safe Storage" keychain item. QuotaSwap needs it to decrypt Claude's session cookie on your Mac. Choose **Always Allow** so you are not asked again.
 
 Use **Add account…** rather than Claude's own **Log out**. Logging out may revoke the saved login on Anthropic's side, and you would have to sign in and save that account again.
@@ -64,6 +66,7 @@ quotaswap save [NAME]          save the signed-in account
 quotaswap add                  sign Claude out locally to add another account
 quotaswap rename OLD NEW       change a saved account's short name
 quotaswap sync [--dry-run]     merge Code session lists across accounts
+quotaswap autostart [on|off]   show or change whether QuotaSwap opens at login
 ```
 
 ## Uninstall
