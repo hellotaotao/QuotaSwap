@@ -1,9 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#34445e"/>
-  <rect x="10" y="20" width="44" height="9" rx="4.5" fill="#ffffff" fill-opacity=".2"/>
-  <rect x="10" y="20" width="31" height="9" rx="4.5" fill="#2e9e57"/>
-  <rect x="10" y="37" width="44" height="9" rx="4.5" fill="#ffffff" fill-opacity=".2"/>
-  <rect x="10" y="37" width="38" height="9" rx="4.5" fill="#dd4538"/>
-  <rect x="35" y="16" width="3" height="17" rx="1.5" fill="#ffffff"/>
-  <rect x="42" y="33" width="3" height="17" rx="1.5" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#46597a"/>
+      <stop offset="1" stop-color="#2b3950"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#body)"/>
+  <rect x="9" y="16" width="46" height="10" rx="5" fill="#fff" fill-opacity=".16"/>
+  <rect x="9" y="16" width="17" height="10" rx="5" fill="#34c46c"/>
+  <rect x="9" y="38" width="46" height="10" rx="5" fill="#fff" fill-opacity=".16"/>
+  <rect x="9" y="38" width="39" height="10" rx="5" fill="#ec5244"/>
+  <rect x="36" y="12" width="3" height="18" rx="1.5" fill="#fff"/>
+  <rect x="36" y="34" width="3" height="18" rx="1.5" fill="#fff"/>
 </svg>
