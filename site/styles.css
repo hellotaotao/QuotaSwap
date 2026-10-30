@@ -93,7 +93,17 @@ code { font-family: var(--mono); font-size: 0.86em; }
   align-items: start;
 }
 
-.hero-copy { padding-top: clamp(64px, 10vw, 128px); }
+.hero-copy { padding-top: clamp(48px, 7vw, 88px); }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 28px -5px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
 
 h1 {
   font-size: clamp(42px, 6.2vw, 76px);
@@ -182,7 +192,6 @@ h1 {
 
 .p-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
 .p-title { font-weight: 700; font-size: 14px; }
-.p-sub { font-size: 11px; color: #86868b; }
 
 .p-account {
   border-radius: 9px;
@@ -242,10 +251,17 @@ h1 {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.p-login {
+  display: flex; align-items: center; gap: 6px;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.15);
+  padding-top: 10px; margin-top: 4px;
+  cursor: pointer;
+}
+.p-login input { margin: 0; accent-color: var(--accent); }
+
 .p-footer {
   display: flex; justify-content: space-between; align-items: center;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.15);
-  padding-top: 10px; margin-top: 4px; color: #6e6e73;
+  padding-top: 8px; color: #6e6e73;
 }
 
 /* On wide screens the panel hangs right under its menu bar item, as it does on a Mac. */

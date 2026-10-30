@@ -12,7 +12,7 @@ const accounts = [
     five: { used: 0, elapsed: 0.27 }, week: { used: 88, elapsed: 0.79 } },
 ];
 
-const state = { current: "a", pending: null, busy: null };
+const state = { current: "a", pending: null, busy: null, openAtLogin: false };
 
 const panel = document.getElementById("panel");
 const statusItem = document.getElementById("status-item");
@@ -77,9 +77,10 @@ function render(focusSelector) {
   const busy = state.busy
     ? `<div class="p-busy"><span class="spinner" aria-hidden="true"></span>Switching to ${state.busy} ...</div>` : "";
   panel.innerHTML = `
-    <div class="p-header"><span class="p-title">QuotaSwap</span><span class="p-sub">${accounts.length} accounts</span></div>
+    <div class="p-header"><span class="p-title">QuotaSwap</span></div>
     ${accounts.map(account).join("")}
     ${busy}
+    <label class="p-login"><input type="checkbox" data-login${state.openAtLogin ? " checked" : ""}>Open at login</label>
     <div class="p-footer"><span>Add account…</span><span>Quit</span></div>`;
   const current = accounts.find((a) => a.id === state.current);
   statusText.textContent = `5h ${current.five.used}% · Wk ${current.week.used}%`;
@@ -109,6 +110,10 @@ panel.addEventListener("click", (event) => {
       hint.textContent = `Switched. The menu bar now shows ${next.email}'s usage.`;
     }, 1200);
   }
+});
+
+panel.addEventListener("change", (event) => {
+  if (event.target.matches("[data-login]")) state.openAtLogin = event.target.checked;
 });
 
 statusItem.addEventListener("click", () => {
