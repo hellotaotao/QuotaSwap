@@ -22,7 +22,6 @@ final class AppModel: ObservableObject {
     @Published private(set) var unsavedAccount: String?  // signed in but no snapshot yet
     @Published private(set) var failedChecks: [CheckResult] = []
     @Published private(set) var claudeVersion: String?
-    @Published private(set) var claudeUpdated = false
     @Published private(set) var busy: String?
     @Published private(set) var loginItem = LoginItem.state
     @Published var message: String?
@@ -64,12 +63,7 @@ final class AppModel: ObservableObject {
 
         loginItem = LoginItem.state
         claudeVersion = ClaudeApp.version
-        let lastVerified = SelfCheck.lastVerifiedVersion
         failedChecks = SelfCheck.run().filter { !$0.ok }
-        if failedChecks.isEmpty {
-            claudeUpdated = lastVerified != nil && lastVerified != claudeVersion
-            SelfCheck.recordVerified(version: claudeVersion)
-        }
     }
 
     private func refreshUsage() {

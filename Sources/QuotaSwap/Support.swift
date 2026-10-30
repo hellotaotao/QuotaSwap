@@ -17,7 +17,6 @@ enum Env {
 
     static var claudeDir: String { vars["QUOTASWAP_CLAUDE_DIR"] ?? home + "/Library/Application Support/Claude" }
     static var store: String { vars["QUOTASWAP_STORE"] ?? home + "/Library/Application Support/Claude-accounts" }
-    static var stateDir: String { vars["QUOTASWAP_STATE_DIR"] ?? home + "/Library/Application Support/QuotaSwap" }
     static var cliConfig: String { vars["QUOTASWAP_CLI_CONFIG"] ?? home + "/.claude.json" }
     static var projectsDir: String { vars["QUOTASWAP_PROJECTS_DIR"] ?? home + "/.claude/projects" }
     static var manageApp: Bool { vars["QUOTASWAP_CLAUDE_DIR"] == nil }

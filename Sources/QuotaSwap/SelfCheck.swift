@@ -118,16 +118,4 @@ enum SelfCheck {
             throw QSError("Self-check failed, nothing changed: " + failed.map { "\($0.name): \($0.detail)" }.joined(separator: "; "))
         }
     }
-
-    // MARK: verified version, so the UI can say when Claude changed
-
-    private static var statePath: String { Env.stateDir + "/state.json" }
-
-    static var lastVerifiedVersion: String? { FS.readObject(statePath)?["verifiedClaudeVersion"] as? String }
-
-    static func recordVerified(version: String?) {
-        guard let version, version != lastVerifiedVersion else { return }
-        try? FS.makeDir(Env.stateDir)
-        try? FS.writeObject(["verifiedClaudeVersion": version, "verifiedAt": localTimestamp()], to: statePath)
-    }
 }

@@ -66,17 +66,15 @@ struct MenuContent: View {
         HStack(alignment: .firstTextBaseline) {
             Text("QuotaSwap").font(.headline)
             Spacer()
-            if let version = model.claudeVersion {
-                Text(model.blocked ? "Claude \(version) · checks failed"
-                     : model.claudeUpdated ? "Claude \(version) · re-verified" : "Claude \(version)")
-                    .font(.caption).foregroundStyle(model.blocked ? .orange : .secondary)
+            if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                Text("v\(version)").font(.caption).foregroundStyle(.secondary)
             }
         }
     }
 
     private var blockedNotice: some View {
         Notice(color: .orange) {
-            Text("Claude's internal layout changed, so switching is disabled until QuotaSwap is updated.")
+            Text("\(model.claudeVersion.map { "Claude \($0)" } ?? "Claude") changed its internal layout, so switching is disabled until QuotaSwap is updated.")
                 .font(.callout)
             ForEach(model.failedChecks, id: \.name) { check in
                 Text("• \(check.name): \(check.detail)").font(.caption).foregroundStyle(.secondary)

@@ -9,7 +9,7 @@ BIN="$(swift build --show-bin-path)/QuotaSwap"
 
 T="$(mktemp -d)"
 trap 'rm -rf "$T"' EXIT
-export QUOTASWAP_CLAUDE_DIR="$T/claude" QUOTASWAP_STORE="$T/store" QUOTASWAP_STATE_DIR="$T/state" \
+export QUOTASWAP_CLAUDE_DIR="$T/claude" QUOTASWAP_STORE="$T/store" \
        QUOTASWAP_CLI_CONFIG="$T/cli.json" QUOTASWAP_PROJECTS_DIR="$T/projects" \
        QUOTASWAP_SAFE_STORAGE_PASSWORD="fake-password"
 UA=aaaaaaaa-0000-4000-8000-000000000001

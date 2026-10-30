@@ -125,7 +125,6 @@ enum CLI {
         let results = SelfCheck.run()
         for r in results { print("\(r.ok ? "ok  " : "FAIL") \(r.name.padding(toLength: 18, withPad: " ", startingAt: 0)) \(r.detail)") }
         let ok = results.allSatisfy(\.ok)
-        if ok { SelfCheck.recordVerified(version: ClaudeApp.version) }
         print(ok ? "all checks passed" : "some checks failed; switching is disabled until QuotaSwap is updated")
         return ok ? 0 : 1
     }
