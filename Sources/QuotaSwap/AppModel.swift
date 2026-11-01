@@ -24,11 +24,13 @@ final class AppModel: ObservableObject {
     @Published private(set) var claudeVersion: String?
     @Published private(set) var busy: String?
     @Published private(set) var loginItem = LoginItem.state
+    @Published private(set) var showGitHistory: Bool?  // nil without Claude Code on this Mac
     @Published var message: String?
     @Published var pending: Action?
 
     private var lastUsageFetch = Date.distantPast
     private var timer: Timer?
+    private var isGitHistoryInstalled = false
 
     init() {
         refresh(force: true)
@@ -64,6 +66,12 @@ final class AppModel: ObservableObject {
         loginItem = LoginItem.state
         claudeVersion = ClaudeApp.version
         failedChecks = SelfCheck.run().filter { !$0.ok }
+
+        showGitHistory = GitHistoryMod.isAvailable ? GitHistoryMod.isOn : nil
+        if showGitHistory != nil && !isGitHistoryInstalled {
+            isGitHistoryInstalled = true
+            do { try GitHistoryMod.install(enable: false, log: { NSLog("%@", $0) }) } catch { message = error.localizedDescription }
+        }
     }
 
     private func refreshUsage() {
@@ -106,6 +114,11 @@ final class AppModel: ObservableObject {
             message = LoginItem.approvalHint
             LoginItem.openSystemSettings()
         }
+    }
+
+    func setShowGitHistory(_ on: Bool) {
+        do { try GitHistoryMod.set(on, log: { NSLog("%@", $0) }) } catch { message = error.localizedDescription }
+        showGitHistory = GitHistoryMod.isOn
     }
 
     func perform(_ action: Action) {

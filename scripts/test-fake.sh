@@ -8,10 +8,11 @@ swift build -q || exit 1
 BIN="$(swift build --show-bin-path)/QuotaSwap"
 
 T="$(mktemp -d)"
-trap 'rm -rf "$T"' EXIT
 export QUOTASWAP_CLAUDE_DIR="$T/claude" QUOTASWAP_STORE="$T/store" \
        QUOTASWAP_CLI_CONFIG="$T/cli.json" QUOTASWAP_PROJECTS_DIR="$T/projects" \
-       QUOTASWAP_SAFE_STORAGE_PASSWORD="fake-password"
+       QUOTASWAP_SAFE_STORAGE_PASSWORD="fake-password" QUOTASWAP_CLAUDE_HOME="$T/dot-claude" \
+       QUOTASWAP_MODS_DIR="$PWD/Resources/ClaudeMods" QUOTASWAP_DEFAULTS="$T/defaults"
+trap 'rm -rf "$T"' EXIT
 UA=aaaaaaaa-0000-4000-8000-000000000001
 UB=bbbbbbbb-0000-4000-8000-000000000002
 OA=11111111-0000-4000-8000-00000000000a
@@ -111,6 +112,59 @@ before=$(app_token)
 out=$("$BIN" use B 2>&1); expect "self-check blocks switching on unknown token fields" "Self-check failed.*oauth:tokenCacheV3" "$out"
 [ "$(app_token)" = "$before" ] && pass "blocked switch changed nothing" || bad "blocked switch changed nothing"
 out=$("$BIN" doctor 2>&1); expect "doctor reports the failure" "FAIL token fields" "$out"
+
+# --- the Git history mod ---
+M="$T/dot-claude/plugins/marketplaces/quotaswap"
+S="$T/dot-claude/settings.json"
+out=$("$BIN" git-history 2>&1); expect "git-history needs a Claude Code folder" "unavailable" "$out"
+out=$("$BIN" git-history on 2>&1); expect "git-history on refuses without one" "unavailable" "$out"
+mkdir -p "$T/dot-claude"
+python3 -I - "$S" <<'EOF'
+import json, sys
+s = {"permissions": {"allow": ["Bash(ls:*)"]}, "enabledPlugins": {"other@x": True}, "zeta": "café", "alpha": 1}
+open(sys.argv[1], "w").write(json.dumps(s, indent=2, ensure_ascii=False) + "\n")
+EOF
+chmod 600 "$S"
+out=$("$BIN" git-history 2>&1); expect "the button defaults to on" "Git history button: on" "$out"
+out=$("$BIN" git-history on 2>&1); expect "git-history on installs the mod" "installed the Git history mod" "$out"
+diff -r "$QUOTASWAP_MODS_DIR/git-history" "$M/plugins/git-history" >/dev/null \
+    && pass "the installed copy matches the bundled mod" || bad "the installed copy matches the bundled mod"
+python3 -I - "$M" "$S" <<'EOF' && pass "marketplace, flag and settings written; the rest of settings kept as it was" || bad "marketplace, flag and settings written; the rest of settings kept as it was"
+import json, os, stat, sys
+m, s = sys.argv[1:]
+market = json.load(open(m + "/.claude-plugin/marketplace.json"))
+assert market == {"name": "quotaswap", "owner": {"name": "QuotaSwap"}, "plugins": [{"name": "git-history", "source": "./plugins/git-history"}]}, market
+assert json.load(open(m + "/git-history.json")) == {"showButton": True}
+text = open(s).read()
+d = json.loads(text)
+assert list(d) == ["permissions", "enabledPlugins", "zeta", "alpha", "extraKnownMarketplaces"], list(d)
+assert d["enabledPlugins"] == {"other@x": True, "git-history@quotaswap": True}, d["enabledPlugins"]
+assert d["extraKnownMarketplaces"] == {"quotaswap": {"source": {"source": "directory", "path": m}}}
+assert d["zeta"] == "café" and d["permissions"] == {"allow": ["Bash(ls:*)"]}
+assert text == json.dumps(d, indent=2, ensure_ascii=False) + "\n", "formatting changed"
+assert stat.S_IMODE(os.stat(s).st_mode) == 0o600
+EOF
+cp "$S" "$T/settings.before"
+out=$("$BIN" git-history off 2>&1); expect "git-history off" "Git history button: off" "$out"
+python3 -I -c "import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))=={'showButton':False} else 1)" "$M/git-history.json" \
+    && pass "off writes the flag" || bad "off writes the flag"
+cmp -s "$S" "$T/settings.before" && pass "off leaves settings alone" || bad "off leaves settings alone"
+out=$("$BIN" git-history on 2>/dev/null)  # a debug build adds a JavaScriptCore notice on stderr
+[ "$out" = "Git history button: on" ] && cmp -s "$S" "$T/settings.before" \
+    && pass "on again changes nothing else" || { bad "on again changes nothing else"; echo "$out" | sed 's/^/     | /'; }
+echo "// stale" >> "$M/plugins/git-history/hooks/register.tsx"
+python3 -I -c "import json,sys; p=sys.argv[1]; d=json.load(open(p)); d['enabledPlugins']['git-history@quotaswap']=False; open(p,'w').write(json.dumps(d,indent=2,ensure_ascii=False)+'\n')" "$S"
+out=$("$BIN" git-history on 2>&1); expect "a changed copy is replaced" "installed the Git history mod" "$out"
+diff -r "$QUOTASWAP_MODS_DIR/git-history" "$M/plugins/git-history" >/dev/null \
+    && pass "the replaced copy matches the bundled mod" || bad "the replaced copy matches the bundled mod"
+python3 -I -c "import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))['enabledPlugins']['git-history@quotaswap'] is True else 1)" "$S" \
+    && pass "turning it on re-enables the plugin in settings" || bad "turning it on re-enables the plugin in settings"
+printf '{ "permissions": ' > "$S"; cp "$S" "$T/settings.bad"
+"$BIN" git-history off >/dev/null 2>&1
+out=$("$BIN" git-history on 2>&1); expect "invalid settings are reported" "is not a valid JSON object" "$out"
+cmp -s "$S" "$T/settings.bad" && pass "invalid settings are left untouched" || bad "invalid settings are left untouched"
+python3 -I -c "import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))=={'showButton':True} else 1)" "$M/git-history.json" \
+    && pass "the flag still follows the switch" || bad "the flag still follows the switch"
 
 echo
 [ $fail -eq 0 ] && echo "all tests passed" || echo "SOME TESTS FAILED"

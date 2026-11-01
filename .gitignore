@@ -3,3 +3,6 @@ build/
 .swiftpm/
 .DS_Store
 .vercel/
+# written by Claude Code when it loads the mod from here
+Resources/ClaudeMods/*/.claude-plugin/types/
+Resources/ClaudeMods/*/tsconfig.json

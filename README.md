@@ -67,6 +67,7 @@ quotaswap add                  sign Claude out locally to add another account
 quotaswap rename OLD NEW       change a saved account's short name
 quotaswap sync [--dry-run]     merge Code session lists across accounts
 quotaswap autostart [on|off]   show or change whether QuotaSwap opens at login
+quotaswap git-history [on|off] show or change the Git history button in Claude Code
 ```
 
 ## Uninstall

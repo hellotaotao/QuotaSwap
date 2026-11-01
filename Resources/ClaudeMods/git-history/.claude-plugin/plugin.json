@@ -1,0 +1,6 @@
+{
+  "name": "git-history",
+  "version": "0.2.0",
+  "description": "A pane with the current project's commit history, each commit's files and diffs",
+  "types": "./types/index.d.ts"
+}

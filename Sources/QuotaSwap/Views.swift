@@ -55,6 +55,12 @@ struct MenuContent: View {
             Toggle("Open at login", isOn: Binding(get: { model.loginItem == .on }, set: { model.setOpenAtLogin($0) }))
                 .toggleStyle(.checkbox)
                 .font(.callout)
+            if let showGitHistory = model.showGitHistory {
+                Toggle("Show Git history button in Claude", isOn: Binding(get: { showGitHistory }, set: { model.setShowGitHistory($0) }))
+                    .toggleStyle(.checkbox)
+                    .font(.callout)
+                    .help("A button above Claude Code's prompt that opens the project's commit history beside the chat")
+            }
             footer
         }
         .padding(14)

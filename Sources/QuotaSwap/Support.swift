@@ -19,6 +19,9 @@ enum Env {
     static var store: String { vars["QUOTASWAP_STORE"] ?? home + "/Library/Application Support/Claude-accounts" }
     static var cliConfig: String { vars["QUOTASWAP_CLI_CONFIG"] ?? home + "/.claude.json" }
     static var projectsDir: String { vars["QUOTASWAP_PROJECTS_DIR"] ?? home + "/.claude/projects" }
+    static var claudeHome: String { vars["QUOTASWAP_CLAUDE_HOME"] ?? home + "/.claude" }
+    static var modsDir: String { vars["QUOTASWAP_MODS_DIR"] ?? (Bundle.main.resourcePath ?? "") + "/ClaudeMods" }
+    static var defaults: UserDefaults { vars["QUOTASWAP_DEFAULTS"].flatMap(UserDefaults.init(suiteName:)) ?? .standard }
     static var manageApp: Bool { vars["QUOTASWAP_CLAUDE_DIR"] == nil }
 
     static var config: String { claudeDir + "/config.json" }

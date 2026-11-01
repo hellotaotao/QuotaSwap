@@ -1,7 +1,7 @@
 import Foundation
 
 enum CLI {
-    static let commands: Set<String> = ["list", "usage", "doctor", "use", "save", "add", "rename", "sync", "autostart", "help", "--help", "-h"]
+    static let commands: Set<String> = ["list", "usage", "doctor", "use", "save", "add", "rename", "sync", "autostart", "git-history", "help", "--help", "-h"]
 
     static let help = """
     QuotaSwap: switch the Claude desktop app between accounts and watch their usage.
@@ -16,6 +16,7 @@ enum CLI {
       quotaswap rename OLD NEW       change a saved account's short name
       quotaswap sync [--dry-run]     merge Code session lists across accounts
       quotaswap autostart [on|off]   show or change whether QuotaSwap opens at login
+      quotaswap git-history [on|off] show or change the Git history button in Claude Code
     """
 
     static func run(_ args: [String]) -> Int32 {
@@ -36,6 +37,12 @@ enum CLI {
             case ("autostart", 2) where ["on", "off"].contains(args[1]):
                 try LoginItem.set(args[1] == "on")
                 print(describeLoginItem())
+            case ("git-history", 1):
+                print(describeGitHistory())
+            case ("git-history", 2) where ["on", "off"].contains(args[1]):
+                guard GitHistoryMod.isAvailable else { throw QSError(describeGitHistory()) }
+                try GitHistoryMod.set(args[1] == "on", log: log)
+                print(describeGitHistory())
             case ("sync", 1), ("sync", 2):
                 let dryRun = args.count == 2 && args[1] == "--dry-run"
                 if args.count == 2 && !dryRun { print(help); return 2 }
@@ -64,6 +71,11 @@ enum CLI {
         case .off: return "opens at login: off"
         case .needsApproval: return "opens at login: waiting for approval. \(LoginItem.approvalHint)"
         }
+    }
+
+    private static func describeGitHistory() -> String {
+        guard GitHistoryMod.isAvailable else { return "Git history button: unavailable, no Claude Code folder at \(Env.claudeHome)" }
+        return "Git history button: \(GitHistoryMod.isOn ? "on" : "off")"
     }
 
     private static func list() {
