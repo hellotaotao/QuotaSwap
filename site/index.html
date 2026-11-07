@@ -78,6 +78,10 @@
         <h3>See every account's usage</h3>
         <p>Each account shows how much of its 5-hour and weekly limit is used and when each resets, refreshed every five minutes. The menu bar shows the account you're signed in to, so you know when it's time to switch.</p>
       </div>
+      <div class="feature">
+        <h3>Git history beside your Code chat</h3>
+        <p>QuotaSwap adds a Git history button above the prompt in Claude Code. It opens the project's commits in a pane next to the chat: click a commit for its message and changed files, click a file for its diff. Untick <em>Show Git history button in Claude</em> in the menu and the button leaves every open session within seconds.</p>
+      </div>
     </section>
 
     <section class="pace" aria-labelledby="pace-title">
@@ -136,6 +140,8 @@
           <tr><td>A saved login for each account, still encrypted by Claude</td><td><code>~/Library/Application Support/Claude-accounts</code></td></tr>
           <tr><td>Each account's list of Code sessions, merged on every switch</td><td><code>~/Library/Application Support/Claude/claude-code-sessions</code></td></tr>
           <tr><td>Session transcripts, shared by all accounts and never modified</td><td><code>~/.claude/projects</code></td></tr>
+          <tr><td>The Git history mod for Claude Code and its on/off switch</td><td><code>~/.claude/plugins/marketplaces/quotaswap</code></td></tr>
+          <tr><td>Two entries that load the mod; the rest of the file is left as it is</td><td><code>~/.claude/settings.json</code></td></tr>
         </tbody>
       </table>
       <p>Claude doesn't document any of this, so QuotaSwap checks it before every change. If a Claude update moves things around, switching turns off and the menu says which check failed. Nothing is written until an updated QuotaSwap knows the new layout.</p>
@@ -158,6 +164,10 @@
       <details>
         <summary>Can it start when I log in?</summary>
         <p>Yes. Tick <em>Open at login</em> in the QuotaSwap menu. It then appears under Login Items in System Settings, where you can also turn it off.</p>
+      </details>
+      <details>
+        <summary>How do I turn off or remove the Git history button?</summary>
+        <p>Untick <em>Show Git history button in Claude</em> in the QuotaSwap menu. Open Claude Code sessions drop the button within a few seconds, and an open Git history pane closes. If you delete QuotaSwap, the button goes away on its own. To remove the mod itself, run <code>claude plugin uninstall git-history@quotaswap</code> and then <code>claude plugin marketplace remove quotaswap</code>.</p>
       </details>
       <details>
         <summary>Is it useful with only one account?</summary>

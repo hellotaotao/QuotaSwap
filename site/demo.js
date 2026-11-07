@@ -12,7 +12,7 @@ const accounts = [
     five: { used: 0, elapsed: 0.27 }, week: { used: 88, elapsed: 0.79 } },
 ];
 
-const state = { current: "a", pending: null, busy: null, openAtLogin: false };
+const state = { current: "a", pending: null, busy: null, openAtLogin: false, gitHistory: true };
 
 const panel = document.getElementById("panel");
 const statusItem = document.getElementById("status-item");
@@ -81,6 +81,7 @@ function render(focusSelector) {
     ${accounts.map(account).join("")}
     ${busy}
     <label class="p-login"><input type="checkbox" data-login${state.openAtLogin ? " checked" : ""}>Open at login</label>
+    <label class="p-option"><input type="checkbox" data-git-history${state.gitHistory ? " checked" : ""}>Show Git history button in Claude</label>
     <div class="p-footer"><span>Add account…</span><span>Quit</span></div>`;
   const current = accounts.find((a) => a.id === state.current);
   statusText.textContent = `5h ${current.five.used}% · Wk ${current.week.used}%`;
@@ -114,6 +115,7 @@ panel.addEventListener("click", (event) => {
 
 panel.addEventListener("change", (event) => {
   if (event.target.matches("[data-login]")) state.openAtLogin = event.target.checked;
+  if (event.target.matches("[data-git-history]")) state.gitHistory = event.target.checked;
 });
 
 statusItem.addEventListener("click", () => {

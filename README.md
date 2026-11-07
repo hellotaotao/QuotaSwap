@@ -7,6 +7,7 @@ A macOS menu bar app for people who use more than one Claude account in the Clau
 - **One-click account switching.** No signing out, no browser sign-in. QuotaSwap keeps a local snapshot of each account's login and swaps them.
 - **Your Code sessions follow you.** The desktop app keeps a separate Code session list per account. QuotaSwap merges those lists when you switch, so every account shows every session, with its full history.
 - **Usage for every account, with pace.** Each account shows its 5-hour and weekly usage and when each resets. A tick on the bar marks how much of the window has passed. The bar turns red when you are using faster than the clock, yellow when you are on pace, and green when you are behind it.
+- **Git history beside your Code chat.** QuotaSwap adds a Git history button above the prompt in Claude Code. It opens the project's commits in a pane next to the chat: click a commit for its message and changed files, click a file for its diff. Untick **Show Git history button in Claude** in the menu and the button leaves every open session within seconds.
 
 The menu bar shows the signed-in account's usage, for example `5h 42% · Wk 26%`.
 
@@ -44,10 +45,14 @@ QuotaSwap relies on undocumented details of the Claude desktop app. That is why 
 | Login snapshot per account: the OAuth token cache from `config.json` and the `Cookies` database, both still encrypted by Claude | `~/Library/Application Support/Claude-accounts/` (readable only by you) |
 | Code session lists, one per account | `~/Library/Application Support/Claude/claude-code-sessions/` |
 | Session transcripts, shared by all accounts | `~/.claude/projects/` |
+| The Git history mod and its on/off switch (`git-history.json`) | `~/.claude/plugins/marketplaces/quotaswap/` |
+| Two entries that load the mod: the `quotaswap` marketplace and the `git-history@quotaswap` plugin. The rest of the file is left as it is. | `~/.claude/settings.json` |
 
 **Switching** quits Claude, saves the current account's latest login (tokens rotate, so the snapshot is refreshed every time you leave an account), merges the Code session lists, restores the target account's login, and reopens Claude. Running chats and Code sessions stop when Claude quits; QuotaSwap asks before it does that.
 
 **Usage** comes from the same endpoint claude.ai uses for its usage page, called with each account's saved session cookie. Nothing is refreshed or rotated, so checking usage never invalidates a saved login.
+
+**Git history** is a Claude Code mod that ships inside QuotaSwap. At launch QuotaSwap copies it to `~/.claude/plugins/marketplaces/quotaswap/` and adds it to Claude Code's settings, so it loads the next time a session starts. The menu checkbox only rewrites a small switch file there, which the mod reads every five seconds, so sessions that are already open follow it without a restart. If you delete QuotaSwap, the mod notices the app is gone and hides the button. To remove the mod itself, run `claude plugin uninstall git-history@quotaswap` and `claude plugin marketplace remove quotaswap`. The checkbox is hidden on Macs without Claude Code (no `~/.claude` folder).
 
 **Self-check.** Before any change, QuotaSwap verifies that Claude's config fields, cookie database and session index still look as expected. If a Claude update changes them, switching is disabled and the menu explains which check failed. Nothing is written in that state.
 

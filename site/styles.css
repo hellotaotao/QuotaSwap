@@ -258,6 +258,8 @@ h1 {
   cursor: pointer;
 }
 .p-login input { margin: 0; accent-color: var(--accent); }
+.p-option { display: flex; align-items: center; gap: 6px; padding-top: 6px; cursor: pointer; }
+.p-option input { margin: 0; accent-color: var(--accent); }
 
 .p-footer {
   display: flex; justify-content: space-between; align-items: center;
