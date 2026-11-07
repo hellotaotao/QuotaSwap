@@ -1,8 +1,7 @@
 #!/bin/bash
 # Build a universal QuotaSwap.app into build/ and sign it.
 #   SIGN_ID    signing identity; "-" signs ad hoc
-#   VERSION    CFBundleShortVersionString (default: `git describe --tags` without the v,
-#              e.g. 0.2.1-2-gdefa701 for two commits past v0.2.1, -dirty with local changes)
+#   VERSION    CFBundleShortVersionString (default: the latest release tag without the v)
 #   TIMESTAMP  set to 1 for a secure timestamp, required for notarization
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -24,7 +23,7 @@ cp "$BIN" "$APP/Contents/MacOS/QuotaSwap"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 rsync -a --exclude tests --exclude tsconfig.json --exclude .claude-plugin/types Resources/ClaudeMods "$APP/Contents/Resources/"
-VERSION="${VERSION:-$(git describe --tags --always --dirty | sed 's/^v//')}"
+VERSION="${VERSION:-$(git describe --tags --abbrev=0 | sed 's/^v//')}"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(git rev-list --count HEAD)" "$APP/Contents/Info.plist"
 
