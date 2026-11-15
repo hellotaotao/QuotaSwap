@@ -2,8 +2,11 @@ import Foundation
 
 /// The parts of Claude's config.json that belong to the signed-in account.
 enum ClaudeConfig {
-    static let accountKeys = ["oauth:tokenCache", "oauth:tokenCacheV2", "lastKnownAccountUuid", "bootSidebarPlaceholder"]
-    static let knownOAuthKeys: Set<String> = ["oauth:tokenCache", "oauth:tokenCacheV2"]
+    /// "oauth:staleSessionLatch" records that the server rejected this account's sign-in as too
+    /// old. Claude ties it to the account's sessionKey, so it travels with the account's snapshot.
+    static let accountKeys = ["oauth:tokenCache", "oauth:tokenCacheV2", "lastKnownAccountUuid", "bootSidebarPlaceholder",
+                              "oauth:staleSessionLatch"]
+    static let knownOAuthKeys: Set<String> = ["oauth:tokenCache", "oauth:tokenCacheV2", "oauth:staleSessionLatch"]
     /// Files under the Claude directory swapped wholesale per account.
     static let statePaths = ["Cookies", "Cookies-journal"]
 

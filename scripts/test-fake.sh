@@ -92,8 +92,15 @@ out=$("$BIN" use ali 2>&1); expect "use by email prefix" "switched to 'alice'" "
 fake_login "$UA" A2 "$OA"   # token rotates while alice is signed in
 out=$("$BIN" use bob@example.com 2>&1); expect "use by full email" "switched to 'B'" "$out"
 [ "$(app_token)" = B1 ] && pass "bob's login restored" || bad "bob's login restored"
+latch() { python3 -I -c "import json,sys; print(json.load(open(sys.argv[1])).get('oauth:staleSessionLatch','none'))" "$T/claude/config.json"; }
+python3 -I -c "import json,sys; p=sys.argv[1]; c=json.load(open(p)); c['oauth:staleSessionLatch']='latch-B'; json.dump(c,open(p,'w'))" "$T/claude/config.json"
+out=$("$BIN" doctor 2>&1); expect "doctor accepts the stale-session latch" "all checks passed" "$out"
 out=$("$BIN" use A 2>&1)
 [ "$(app_token)" = A2 ] && pass "rotated token was saved on switch-away" || bad "rotated token was saved on switch-away"
+[ "$(latch)" = none ] && pass "bob's stale-session latch stays with bob" || bad "bob's stale-session latch stays with bob ($(latch))"
+"$BIN" use B >/dev/null 2>&1
+[ "$(latch)" = latch-B ] && pass "bob's stale-session latch comes back with bob" || bad "bob's stale-session latch comes back with bob ($(latch))"
+"$BIN" use A >/dev/null 2>&1
 out=$("$BIN" use alice 2>&1); expect "use the signed-in account is a no-op" "already signed in" "$out"
 out=$("$BIN" use zzz 2>&1); expect "unknown account is rejected" "No saved account matches 'zzz'" "$out"
 out=$("$BIN" rename alice A 2>&1); expect "rename" "renamed 'alice' -> 'A' \(alice@example.com\)" "$out"
