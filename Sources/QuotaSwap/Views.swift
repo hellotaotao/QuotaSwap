@@ -207,15 +207,31 @@ struct UsageBar: View {
                         color: Pace(usedPercent: value, elapsed: elapsed).color)
                     .help(elapsed.map { "\(percent(value)) used, \(percent($0 * 100)) of the window elapsed" } ?? "\(percent(value)) used")
                 Text(percent(value)).font(.caption).monospacedDigit().frame(width: 34, alignment: .trailing)
-                Text(shortDuration(until: window?.resetsAt).map { "resets in \($0)" } ?? "")
-                    .font(.caption2).foregroundStyle(.secondary).monospacedDigit()
-                    .lineLimit(1)
-                    .frame(width: 96, alignment: .trailing)
+                ResetLabel(resetsAt: window?.resetsAt)
             } else {
                 Text(loaded ? "not reported" : "—").font(.caption).foregroundStyle(.secondary)
                 Spacer()
             }
         }
+    }
+}
+
+/// Time until the window resets, behind a clock so it reads as a time, not a button.
+struct ResetLabel: View {
+    let resetsAt: Date?
+
+    var body: some View {
+        HStack(spacing: 3) {
+            if let left = shortDuration(until: resetsAt), let resetsAt {
+                Image(systemName: "clock")
+                Text(left).monospacedDigit()
+                    .help("Resets in \(left) (\(resetsAt.formatted(.dateTime.weekday(.abbreviated).hour().minute())))")
+            }
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .frame(width: 66, alignment: .trailing)
     }
 }
 
