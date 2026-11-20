@@ -65,7 +65,11 @@ struct MenuContent: View {
         }
         .padding(14)
         .frame(width: 340)
-        .onAppear { model.refresh() }
+        .onAppear { model.menuOpened() }
+        // The menu's window can outlive a close, so onAppear alone may miss later openings.
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            model.menuOpened()
+        }
     }
 
     private var header: some View {

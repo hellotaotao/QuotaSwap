@@ -48,7 +48,12 @@ final class AppModel: ObservableObject {
     func refresh(force: Bool = false) {
         guard busy == nil else { return }
         reloadLocal()
-        if force || Date().timeIntervalSince(lastUsageFetch) > 60 { refreshUsage() }
+        if force || Date().timeIntervalSince(lastUsageFetch) > 5 { refreshUsage() }
+    }
+
+    /// Opening the menu is a request for current numbers, so refresh unless that just happened.
+    func menuOpened() {
+        refresh()
     }
 
     private func reloadLocal() {
