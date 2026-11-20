@@ -48,7 +48,28 @@ final class AppModel: ObservableObject {
     func refresh(force: Bool = false) {
         guard busy == nil else { return }
         reloadLocal()
+        runSelfCheck(force: force)
         if force || Date().timeIntervalSince(lastUsageFetch) > 5 { refreshUsage() }
+    }
+
+    private var selfCheckRunning = false
+    private var lastSelfCheck = Date.distantPast
+
+    /// The self-check parses every session file and takes about a second, so it runs off the
+    /// main thread and the menu opens at once. Operations that write run it again first anyway.
+    private func runSelfCheck(force: Bool) {
+        guard !selfCheckRunning, force || Date().timeIntervalSince(lastSelfCheck) > 30 else { return }
+        selfCheckRunning = true
+        lastSelfCheck = Date()
+        Task.detached { [weak self] in
+            let failed = SelfCheck.run().filter { !$0.ok }
+            await self?.applySelfCheck(failed)
+        }
+    }
+
+    private func applySelfCheck(_ failed: [CheckResult]) {
+        failedChecks = failed
+        selfCheckRunning = false
     }
 
     /// Opening the menu is a request for current numbers, so refresh unless that just happened.
@@ -72,7 +93,6 @@ final class AppModel: ObservableObject {
 
         loginItem = LoginItem.state
         claudeVersion = ClaudeApp.version
-        failedChecks = SelfCheck.run().filter { !$0.ok }
 
         showGitHistory = GitHistoryMod.isAvailable ? GitHistoryMod.isOn : nil
         if showGitHistory != nil && !isGitHistoryInstalled {
