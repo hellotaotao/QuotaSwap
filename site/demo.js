@@ -41,7 +41,7 @@ function bar(label, window, length) {
         <span class="tick" style="left:${window.elapsed * 100}%"></span>
       </span>
       <span class="value">${window.used}%</span>
-      <span class="reset">↻ ${untilReset(window.elapsed, length)}</span>
+      <span class="reset">resets in ${untilReset(window.elapsed, length)}</span>
     </div>`;
 }
 

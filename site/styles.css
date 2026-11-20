@@ -232,7 +232,7 @@ h1 {
 .p-confirm p { margin: 0 0 6px; font-size: 11px; color: #6e6e73; }
 .p-confirm div { display: flex; justify-content: flex-end; gap: 8px; }
 
-.p-bar { display: grid; grid-template-columns: 34px 1fr 34px 62px; align-items: center; gap: 8px; margin-top: 5px; }
+.p-bar { display: grid; grid-template-columns: 34px 1fr 34px 96px; align-items: center; gap: 8px; margin-top: 5px; }
 .p-bar .label { font-size: 11px; color: #86868b; }
 .p-bar .value { font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
 .p-bar .reset { font-size: 10px; color: #86868b; text-align: right; font-variant-numeric: tabular-nums; }

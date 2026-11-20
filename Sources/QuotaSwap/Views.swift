@@ -207,9 +207,10 @@ struct UsageBar: View {
                         color: Pace(usedPercent: value, elapsed: elapsed).color)
                     .help(elapsed.map { "\(percent(value)) used, \(percent($0 * 100)) of the window elapsed" } ?? "\(percent(value)) used")
                 Text(percent(value)).font(.caption).monospacedDigit().frame(width: 34, alignment: .trailing)
-                Text(shortDuration(until: window?.resetsAt).map { "↻ \($0)" } ?? "")
+                Text(shortDuration(until: window?.resetsAt).map { "resets in \($0)" } ?? "")
                     .font(.caption2).foregroundStyle(.secondary).monospacedDigit()
-                    .frame(width: 62, alignment: .trailing)
+                    .lineLimit(1)
+                    .frame(width: 96, alignment: .trailing)
             } else {
                 Text(loaded ? "not reported" : "—").font(.caption).foregroundStyle(.secondary)
                 Spacer()
