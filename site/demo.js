@@ -77,7 +77,7 @@ function render(focusSelector) {
   const busy = state.busy
     ? `<div class="p-busy"><span class="spinner" aria-hidden="true"></span>Switching to ${state.busy} ...</div>` : "";
   panel.innerHTML = `
-    <div class="p-header"><span class="p-title">QuotaSwap</span></div>
+    <div class="p-header"><span class="p-title">QuotaSwap</span><span class="p-updated">Updated just now ↻</span></div>
     ${accounts.map(account).join("")}
     ${busy}
     <label class="p-login"><input type="checkbox" data-login${state.openAtLogin ? " checked" : ""}>Open at login</label>

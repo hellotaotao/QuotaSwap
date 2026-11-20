@@ -71,10 +71,11 @@ struct MenuContent: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             Text("QuotaSwap").font(.headline)
-            Spacer()
             if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                 Text("v\(version)").font(.caption).foregroundStyle(.secondary)
             }
+            Spacer()
+            RefreshStatus(model: model)
         }
     }
 
@@ -105,14 +106,46 @@ struct MenuContent: View {
                     .disabled(model.blocked || model.busy != nil || model.unsavedAccount != nil)
                     .help(model.unsavedAccount != nil ? "Save the signed-in account first" : "Sign Claude out locally, then sign in to another account")
                 Spacer()
-                Button { model.refresh(force: true) } label: { Image(systemName: "arrow.clockwise") }
-                    .help("Refresh usage")
-                    .disabled(model.busy != nil)
                 Button("Quit") { NSApp.terminate(nil) }
             }
         }
         .buttonStyle(.borderless)
     }
+}
+
+/// Says how fresh the usage numbers are and refreshes them when clicked.
+struct RefreshStatus: View {
+    @ObservedObject var model: AppModel
+
+    var body: some View {
+        Button { model.refresh(force: true) } label: {
+            HStack(spacing: 4) {
+                if model.refreshing {
+                    ProgressView().controlSize(.mini)
+                    Text("Updating…")
+                } else {
+                    TimelineView(.periodic(from: .now, by: 20)) { context in
+                        Text(updatedText(model.lastUpdated, now: context.date))
+                    }
+                    Image(systemName: "arrow.clockwise")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .disabled(model.busy != nil || model.refreshing)
+        .help("Refresh usage now. It also refreshes when you open this menu and every 5 minutes.")
+    }
+}
+
+func updatedText(_ date: Date?, now: Date = Date()) -> String {
+    guard let date else { return "Refresh" }
+    let minutes = Int(now.timeIntervalSince(date) / 60)
+    if minutes < 1 { return "Updated just now" }
+    if minutes < 60 { return "Updated \(minutes)m ago" }
+    return "Updated \(minutes / 60)h ago"
 }
 
 struct AccountRow: View {

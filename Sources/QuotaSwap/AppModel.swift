@@ -29,6 +29,8 @@ final class AppModel: ObservableObject {
     @Published var pending: Action?
 
     private var lastUsageFetch = Date.distantPast
+    /// When usage last came back successfully, shown in the menu header.
+    @Published private(set) var lastUpdated: Date?
     private var timer: Timer?
     private var isGitHistoryInstalled = false
 
@@ -98,8 +100,13 @@ final class AppModel: ObservableObject {
         guard let i = rows.firstIndex(where: { $0.id == name }) else { return }
         rows[i].loading = false
         rows[i].error = error
-        if let usage { rows[i].usage = usage }  // keep the last good numbers on failure
+        if let usage {
+            rows[i].usage = usage  // keep the last good numbers on failure
+            lastUpdated = usage.fetchedAt
+        }
     }
+
+    var refreshing: Bool { rows.contains(where: \.loading) }
 
     // MARK: actions
 
