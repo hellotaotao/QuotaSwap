@@ -185,7 +185,12 @@ final class AppModel: ObservableObject {
     nonisolated private static func summary(for action: Action, log: [String]) -> String {
         switch action {
         case .add: return "Sign in to the new account in Claude, then come back here to save it."
-        default: return log.last { $0.hasPrefix("switched") || $0.hasPrefix("saved") || $0.contains("already signed in") } ?? "Done."
+        case .switchTo(let name):
+            let who = Profiles.load(name).map { $0.email ?? $0.name } ?? name
+            return log.contains { $0.contains("already signed in") } ? "\(who) is already active." : "Switched to \(who)."
+        case .save:
+            let who = Profiles.forUUID(ClaudeConfig.currentUUID()).map { $0.email ?? $0.name } ?? "the account"
+            return "Saved \(who)."
         }
     }
 

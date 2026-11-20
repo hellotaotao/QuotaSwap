@@ -163,11 +163,7 @@ struct AccountRow: View {
             HStack(spacing: 8) {
                 Image(systemName: isCurrent ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(isCurrent ? Color.accentColor : Color.secondary)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(row.profile.email ?? row.profile.name).fontWeight(.medium).lineLimit(1)
-                    Text(isCurrent ? "\(row.profile.name) · signed in" : row.profile.name)
-                        .font(.caption).foregroundStyle(.secondary)
-                }
+                Text(row.profile.email ?? row.profile.name).fontWeight(.medium).lineLimit(1)
                 Spacer()
                 if row.loading { ProgressView().controlSize(.small) }
                 if !isCurrent && model.pending != .switchTo(row.id) {

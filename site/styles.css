@@ -211,9 +211,7 @@ h1 {
   border: 1.5px solid #a1a1a6;
 }
 .is-current .p-mark { border: 0; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 8.3 2.3 2.2 4.7-4.8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat; }
-.p-who { flex: 1; min-width: 0; }
-.p-email { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-name { font-size: 11px; color: #86868b; }
+.p-email { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .p-button {
   font: 500 12px/1 var(--system);

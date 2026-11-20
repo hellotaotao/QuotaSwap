@@ -6,9 +6,9 @@ const HOUR = 3600;
 const WINDOWS = { five: 5 * HOUR, week: 7 * 24 * HOUR };
 
 const accounts = [
-  { id: "a", email: "alex@acme.dev", name: "work",
+  { id: "a", email: "alex@acme.dev",
     five: { used: 42, elapsed: 0.13 }, week: { used: 26, elapsed: 0.62 } },
-  { id: "b", email: "alex@sidequest.dev", name: "personal",
+  { id: "b", email: "alex@sidequest.dev",
     five: { used: 0, elapsed: 0.27 }, week: { used: 88, elapsed: 0.79 } },
 ];
 
@@ -61,10 +61,7 @@ function account(a) {
     <div class="p-account${current ? " is-current" : ""}">
       <div class="p-row">
         <span class="p-mark" aria-hidden="true"></span>
-        <div class="p-who">
-          <div class="p-email">${a.email}</div>
-          <div class="p-name">${current ? `${a.name} · signed in` : a.name}</div>
-        </div>
+        <div class="p-email">${a.email}</div>
         ${action}
       </div>
       ${confirm}
