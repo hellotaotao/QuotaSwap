@@ -9,7 +9,7 @@ const accounts = [
   { id: "a", email: "alex@acme.dev",
     five: { used: 42, elapsed: 0.13 }, week: { used: 26, elapsed: 0.62 } },
   { id: "b", email: "alex@sidequest.dev",
-    five: { used: 0, elapsed: 0.27 }, week: { used: 88, elapsed: 0.79 } },
+    five: { used: 0, elapsed: null }, week: { used: 88, elapsed: 0.79 } },
 ];
 
 const state = { current: "a", pending: null, busy: null, openAtLogin: false, gitHistory: true };
@@ -21,6 +21,7 @@ const hint = document.getElementById("panel-hint");
 
 function pace(used, elapsed) {
   if (used >= 100) return "over";
+  if (elapsed === null) return "under";  // window not started yet
   const lead = used - elapsed * 100;
   return lead > 5 ? "over" : lead < -5 ? "under" : "even";
 }
@@ -38,10 +39,12 @@ function bar(label, window, length) {
       <span class="label">${label}</span>
       <span class="track">
         <span class="fill ${pace(window.used, window.elapsed)}" style="width:${window.used}%"></span>
-        <span class="tick" style="left:${window.elapsed * 100}%"></span>
+        ${window.elapsed === null ? "" : `<span class="tick" style="left:${window.elapsed * 100}%"></span>`}
       </span>
       <span class="value">${window.used}%</span>
-      <span class="reset"><svg class="clock-icon" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6 3.4V6l1.8 1.1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>${untilReset(window.elapsed, length)}</span>
+      ${window.elapsed === null
+        ? `<span class="reset" title="The window starts with your next message">not started</span>`
+        : `<span class="reset"><svg class="clock-icon" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M6 3.4V6l1.8 1.1" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>${untilReset(window.elapsed, length)}</span>`}
     </div>`;
 }
 

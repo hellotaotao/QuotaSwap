@@ -65,6 +65,7 @@ struct MenuContent: View {
         }
         .padding(14)
         .frame(width: 340)
+        .background(WindowShadowRefresher())
         .onAppear { model.menuOpened() }
         // The menu's window can outlive a close, so onAppear alone may miss later openings.
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
@@ -212,6 +213,26 @@ struct UsageBar: View {
     }
 }
 
+/// In dark mode the menu window's thin outline is part of its shadow, and AppKit keeps the old
+/// shadow when the window grows or shrinks while open, so the outline stops short of the new
+/// corners. This view tracks the content's size and has the shadow recomputed on every change.
+struct WindowShadowRefresher: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { RefreshingView() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+
+    final class RefreshingView: NSView {
+        override func setFrameSize(_ newSize: NSSize) {
+            super.setFrameSize(newSize)
+            DispatchQueue.main.async { [weak self] in self?.window?.invalidateShadow() }
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            window?.invalidateShadow()
+        }
+    }
+}
+
 /// Time until the window resets, behind a clock so it reads as a time, not a button.
 struct ResetLabel: View {
     let resetsAt: Date?
@@ -222,6 +243,10 @@ struct ResetLabel: View {
                 Image(systemName: "clock")
                 Text(left).monospacedDigit()
                     .help("Resets in \(left) (\(resetsAt.formatted(.dateTime.weekday(.abbreviated).hour().minute())))")
+            } else {
+                // Claude reports no reset time until the first message opens a window.
+                Text("not started")
+                    .help("The window starts with your next message, so there is no reset time yet")
             }
         }
         .font(.caption2)
@@ -359,7 +384,7 @@ enum PreviewRenderer {
         let samples: [(String, UsageWindow?, TimeInterval)] = [
             ("5h", window(23, resetIn: 4 * 3600 + 40 * 60), 5 * 3600),
             ("Week", window(24, resetIn: 2 * 86400 + 3 * 3600), 7 * 86400),
-            ("5h", window(0, resetIn: 3 * 3600 + 40 * 60), 5 * 3600),
+            ("5h", UsageWindow(utilization: 0, resetsAt: nil), 5 * 3600),
             ("Week", window(88, resetIn: 86400 + 12 * 3600), 7 * 86400),
             ("5h", window(50, resetIn: 2.5 * 3600), 5 * 3600),
             ("Week", nil, 7 * 86400),
