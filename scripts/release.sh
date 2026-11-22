@@ -50,4 +50,6 @@ spctl -a -t open --context context:primary-signature -v "$DMG"
 cp "$DMG" build/QuotaSwap.dmg
 gh release create "$TAG" "$DMG" build/QuotaSwap.dmg --repo hellotaotao/QuotaSwap --title "QuotaSwap $VERSION" \
     --notes "Notarized universal build for macOS 13+. Install with \`brew install --cask hellotaotao/tap/quotaswap\` or open the DMG."
+# gh creates the tag on GitHub; fetch it so local builds name the right version.
+git fetch -q --tags origin
 echo "sha256: $(shasum -a 256 "$DMG" | cut -d' ' -f1)"
